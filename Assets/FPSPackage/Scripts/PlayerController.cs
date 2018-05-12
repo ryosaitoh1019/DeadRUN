@@ -4,7 +4,7 @@ public class PlayerController : MonoBehaviour {
 
     public Camera camera;
 
-    public AudioSource gunSound;
+   
 
     int playerHP = 10;
 
@@ -20,7 +20,7 @@ public class PlayerController : MonoBehaviour {
         if (Input.GetMouseButtonDown(0))
         {
             Shot();
-            gunSound.Play();
+            
         }
     }
     void Shot()

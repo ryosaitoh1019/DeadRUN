@@ -6,17 +6,11 @@ public class EnemyScript : MonoBehaviour
 
     public int enemyHP = 3; // 敵の体力
     public GameObject Bomb; // 爆発のオブジェクト
-    public Slider slider;
-    void Start()
-    {
-        slider.maxValue = 3;
-    }
     // Playerにダメージを与えられた時
     void Damage()
     {
         enemyHP--; //体力を1減らす。
-                   // 体力がゼロになったら
-        slider.value = enemyHP;
+                   // 体力がゼロになった
         if (enemyHP == 0)
         {
             if (Bomb)
