@@ -1,13 +1,15 @@
-using System;
 using UnityEngine;
+//using System;
 
-namespace UnityStandardAssets.ImageEffects
+namespace UnitySampleAssets.ImageEffects
 {
+
     /// A Utility class for performing various image based rendering tasks.
     [AddComponentMenu("")]
     public class ImageEffects
     {
-        public static void RenderDistortion(Material material, RenderTexture source, RenderTexture destination, float angle, Vector2 center, Vector2 radius)
+        public static void RenderDistortion(Material material, RenderTexture source, RenderTexture destination,
+                                            float angle, Vector2 center, Vector2 radius)
         {
             bool invertY = source.texelSize.y < 0.0f;
             if (invertY)
@@ -25,15 +27,13 @@ namespace UnityStandardAssets.ImageEffects
             Graphics.Blit(source, destination, material);
         }
 
-
-        [Obsolete("Use Graphics.Blit(source,dest) instead")]
+        [System.Obsolete("Use Graphics.Blit(source,dest) instead")]
         public static void Blit(RenderTexture source, RenderTexture dest)
         {
             Graphics.Blit(source, dest);
         }
 
-
-        [Obsolete("Use Graphics.Blit(source, destination, material) instead")]
+        [System.Obsolete("Use Graphics.Blit(source, destination, material) instead")]
         public static void BlitWithMaterial(Material material, RenderTexture source, RenderTexture dest)
         {
             Graphics.Blit(source, dest, material);

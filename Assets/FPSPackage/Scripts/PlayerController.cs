@@ -1,7 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
-public class PlayerController : MonoBehaviour
-{
+public class PlayerController : MonoBehaviour {
 
     public Camera camera;
 
@@ -9,11 +8,10 @@ public class PlayerController : MonoBehaviour
 
     int playerHP = 10;
 
-    void Start()
-    {
+	void Start () {
         Cursor.lockState = CursorLockMode.Locked;
 
-    }
+	}
 
     // Update is called once per frame
     void Update()
@@ -27,13 +25,12 @@ public class PlayerController : MonoBehaviour
     }
     void Shot()
     {
-        int distance = 10;
+        int distance = 100;
         Vector3 center = new Vector3(Screen.width / 2, Screen.height / 2, 0);
-        Ray ray = camera.ScreenPointToRay(Input.mousePosition);
+        Ray ray = camera.ScreenPointToRay (Input.mousePosition);
         RaycastHit hitInfo;
 
-        if (Physics.Raycast(ray, out hitInfo, distance))
-        {
+        if(Physics.Raycast(ray, out hitInfo, distance)) {
             if (hitInfo.collider.tag == "Enemy")
             {
                 Destroy(hitInfo.collider.gameObject);

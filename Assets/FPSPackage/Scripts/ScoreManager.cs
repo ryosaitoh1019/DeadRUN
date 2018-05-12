@@ -5,7 +5,7 @@ using UnityEngine.UI;
 public class ScoreManager : MonoBehaviour {
 
 	public static ScoreManager instance;
-	public int enemyCount = 0; //敵を倒した数
+	public int enemyCount =1; //敵を倒した数
 	public Text scoreLabel; //UIテキスト
 
 

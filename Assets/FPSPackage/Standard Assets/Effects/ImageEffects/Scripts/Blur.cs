@@ -1,108 +1,96 @@
-using System;
 using UnityEngine;
 
-namespace UnityStandardAssets.ImageEffects
+namespace UnitySampleAssets.ImageEffects
 {
     [ExecuteInEditMode]
-    [AddComponentMenu("Image Effects/Blur/Blur")]
-    public class Blur : MonoBehaviour
+    [RequireComponent(typeof (Camera))]
+    [AddComponentMenu("Image Effects/Blur/Blur (Optimized)")]
+    public class Blur : PostEffectsBase
     {
-        /// Blur iterations - larger number means more blur.
-        [Range(0,10)]
-        public int iterations = 3;
 
-        /// Blur spread for each iteration. Lower values
-        /// give better looking blur, but require more iterations to
-        /// get large blurs. Value is usually between 0.5 and 1.0.
-        [Range(0.0f,1.0f)]
-        public float blurSpread = 0.6f;
+        [Range(0, 2)] public int downsample = 1;
 
-
-        // --------------------------------------------------------
-        // The blur iteration shader.
-        // Basically it just takes 4 texture samples and averages them.
-        // By applying it repeatedly and spreading out sample locations
-        // we get a Gaussian blur approximation.
-
-        public Shader blurShader = null;
-
-        static Material m_Material = null;
-        protected Material material {
-            get {
-                if (m_Material == null) {
-                    m_Material = new Material(blurShader);
-                    m_Material.hideFlags = HideFlags.DontSave;
-                }
-                return m_Material;
-            }
-        }
-
-        protected void OnDisable() {
-            if ( m_Material ) {
-                DestroyImmediate( m_Material );
-            }
-        }
-
-        // --------------------------------------------------------
-
-        protected void Start()
+        public enum BlurType
         {
-            // Disable if we don't support image effects
-            if (!SystemInfo.supportsImageEffects) {
-                enabled = false;
-                return;
-            }
-            // Disable if the shader can't run on the users graphics card
-            if (!blurShader || !material.shader.isSupported) {
-                enabled = false;
-                return;
-            }
+            StandardGauss = 0,
+            SgxGauss = 1,
         }
 
-        // Performs one blur iteration.
-        public void FourTapCone (RenderTexture source, RenderTexture dest, int iteration)
+        [Range(0.0f, 10.0f)] public float blurSize = 3.0f;
+
+        [Range(1, 4)] public int blurIterations = 2;
+
+        public BlurType blurType = BlurType.StandardGauss;
+
+        public Shader blurShader;
+        private Material blurMaterial = null;
+
+        protected override bool CheckResources()
         {
-            float off = 0.5f + iteration*blurSpread;
-            Graphics.BlitMultiTap (source, dest, material,
-                                   new Vector2(-off, -off),
-                                   new Vector2(-off,  off),
-                                   new Vector2( off,  off),
-                                   new Vector2( off, -off)
-                );
+            CheckSupport(false);
+
+            blurMaterial = CheckShaderAndCreateMaterial(blurShader, blurMaterial);
+
+            if (!isSupported)
+                ReportAutoDisable();
+            return isSupported;
         }
 
-        // Downsamples the texture to a quarter resolution.
-        private void DownSample4x (RenderTexture source, RenderTexture dest)
+        private void OnDisable()
         {
-            float off = 1.0f;
-            Graphics.BlitMultiTap (source, dest, material,
-                                   new Vector2(-off, -off),
-                                   new Vector2(-off,  off),
-                                   new Vector2( off,  off),
-                                   new Vector2( off, -off)
-                );
+            if (blurMaterial)
+                DestroyImmediate(blurMaterial);
         }
 
-        // Called by the camera to apply the image effect
-        void OnRenderImage (RenderTexture source, RenderTexture destination) {
-            int rtW = source.width/4;
-            int rtH = source.height/4;
-            RenderTexture buffer = RenderTexture.GetTemporary(rtW, rtH, 0);
-
-            // Copy source to the 4x4 smaller texture.
-            DownSample4x (source, buffer);
-
-            // Blur the small texture
-            for(int i = 0; i < iterations; i++)
+        private void OnRenderImage(RenderTexture source, RenderTexture destination)
+        {
+            if (CheckResources() == false)
             {
-                RenderTexture buffer2 = RenderTexture.GetTemporary(rtW, rtH, 0);
-                FourTapCone (buffer, buffer2, i);
-                RenderTexture.ReleaseTemporary(buffer);
-                buffer = buffer2;
+                Graphics.Blit(source, destination);
+                return;
             }
-            Graphics.Blit(buffer, destination);
 
-            RenderTexture.ReleaseTemporary(buffer);
+            float widthMod = 1.0f/(1.0f*(1 << downsample));
+
+            blurMaterial.SetVector("_Parameter", new Vector4(blurSize*widthMod, -blurSize*widthMod, 0.0f, 0.0f));
+            source.filterMode = FilterMode.Bilinear;
+
+            int rtW = source.width >> downsample;
+            int rtH = source.height >> downsample;
+
+            // downsample
+            RenderTexture rt = RenderTexture.GetTemporary(rtW, rtH, 0, source.format);
+
+            rt.filterMode = FilterMode.Bilinear;
+            Graphics.Blit(source, rt, blurMaterial, 0);
+
+            var passOffs = blurType == BlurType.StandardGauss ? 0 : 2;
+
+            for (int i = 0; i < blurIterations; i++)
+            {
+                float iterationOffs = (i*1.0f);
+                blurMaterial.SetVector("_Parameter",
+                                       new Vector4(blurSize*widthMod + iterationOffs, -blurSize*widthMod - iterationOffs,
+                                                   0.0f, 0.0f));
+
+                // vertical blur
+                RenderTexture rt2 = RenderTexture.GetTemporary(rtW, rtH, 0, source.format);
+                rt2.filterMode = FilterMode.Bilinear;
+                Graphics.Blit(rt, rt2, blurMaterial, 1 + passOffs);
+                RenderTexture.ReleaseTemporary(rt);
+                rt = rt2;
+
+                // horizontal blur
+                rt2 = RenderTexture.GetTemporary(rtW, rtH, 0, source.format);
+                rt2.filterMode = FilterMode.Bilinear;
+                Graphics.Blit(rt, rt2, blurMaterial, 2 + passOffs);
+                RenderTexture.ReleaseTemporary(rt);
+                rt = rt2;
+            }
+
+            Graphics.Blit(rt, destination);
+
+            RenderTexture.ReleaseTemporary(rt);
         }
     }
 }

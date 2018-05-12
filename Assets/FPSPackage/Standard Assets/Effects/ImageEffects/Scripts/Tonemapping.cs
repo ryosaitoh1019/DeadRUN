@@ -1,13 +1,13 @@
-using System;
 using UnityEngine;
 
-namespace UnityStandardAssets.ImageEffects
+namespace UnitySampleAssets.ImageEffects
 {
     [ExecuteInEditMode]
     [RequireComponent(typeof (Camera))]
-    [AddComponentMenu("Image Effects/Color Adjustments/Tonemapping")]
+    [AddComponentMenu("Image Effects/Tonemapping")]
     public class Tonemapping : PostEffectsBase
     {
+
         public enum TonemapperType
         {
             SimpleReinhard,
@@ -52,8 +52,7 @@ namespace UnityStandardAssets.ImageEffects
         private RenderTexture rt = null;
         private RenderTextureFormat rtFormat = RenderTextureFormat.ARGBHalf;
 
-
-        public override bool CheckResources()
+        protected override bool CheckResources()
         {
             CheckSupport(false, true);
 
@@ -71,7 +70,6 @@ namespace UnityStandardAssets.ImageEffects
             return isSupported;
         }
 
-
         public float UpdateCurve()
         {
             float range = 1.0f;
@@ -79,7 +77,7 @@ namespace UnityStandardAssets.ImageEffects
                 remapCurve = new AnimationCurve(new Keyframe(0, 0), new Keyframe(2, 1));
             if (remapCurve != null)
             {
-                if (remapCurve.length > 0)
+                if (remapCurve.length != 0)
                     range = remapCurve[remapCurve.length - 1].time;
                 for (float i = 0.0f; i <= 1.0f; i += 1.0f/255.0f)
                 {
@@ -90,7 +88,6 @@ namespace UnityStandardAssets.ImageEffects
             }
             return 1.0f/range;
         }
-
 
         private void OnDisable()
         {
@@ -111,21 +108,21 @@ namespace UnityStandardAssets.ImageEffects
             }
         }
 
-
         private bool CreateInternalRenderTexture()
         {
             if (rt)
             {
                 return false;
             }
-            rtFormat = SystemInfo.SupportsRenderTextureFormat(RenderTextureFormat.RGHalf) ? RenderTextureFormat.RGHalf : RenderTextureFormat.ARGBHalf;
+            rtFormat = SystemInfo.SupportsRenderTextureFormat(RenderTextureFormat.RGHalf)
+                           ? RenderTextureFormat.RGHalf
+                           : RenderTextureFormat.ARGBHalf;
             rt = new RenderTexture(1, 1, 0, rtFormat);
             rt.hideFlags = HideFlags.DontSave;
             return true;
         }
 
-
-        // attribute indicates that the image filter chain will continue in LDR
+        // a new attribute we introduced in 3.5 indicating that the image filter chain will continue in LDR
         [ImageEffectTransformsToLDR]
         private void OnRenderImage(RenderTexture source, RenderTexture destination)
         {
@@ -186,27 +183,31 @@ namespace UnityStandardAssets.ImageEffects
                 return;
             }
 
-            // still here?
+            // still here? 
             // =>  adaptive tone mapping:
-            // builds an average log luminance, tonemaps according to
+            // builds an average log luminance, tonemaps according to 
             // middle grey and white values (user controlled)
 
             // AdaptiveReinhardAutoWhite will calculate white value automagically
 
-            bool freshlyBrewedInternalRt = CreateInternalRenderTexture(); // this retrieves rtFormat, so should happen before rt allocations
+            bool freshlyBrewedInternalRt = CreateInternalRenderTexture();
+                // this retrieves rtFormat, so should happen before rt allocations
 
-            RenderTexture rtSquared = RenderTexture.GetTemporary((int) adaptiveTextureSize, (int) adaptiveTextureSize, 0, rtFormat);
+            RenderTexture rtSquared = RenderTexture.GetTemporary((int) adaptiveTextureSize, (int) adaptiveTextureSize, 0,
+                                                                 rtFormat);
             Graphics.Blit(source, rtSquared);
 
             int downsample = (int) Mathf.Log(rtSquared.width*1.0f, 2);
 
             int div = 2;
-            var rts = new RenderTexture[downsample];
+            RenderTexture[] rts = new RenderTexture[downsample];
             for (int i = 0; i < downsample; i++)
             {
                 rts[i] = RenderTexture.GetTemporary(rtSquared.width/div, rtSquared.width/div, 0, rtFormat);
                 div *= 2;
             }
+
+            //float ar = (source.width*1.0f)/(source.height*1.0f);
 
             // downsample pyramid
 
@@ -234,15 +235,13 @@ namespace UnityStandardAssets.ImageEffects
             adaptionSpeed = adaptionSpeed < 0.001f ? 0.001f : adaptionSpeed;
             tonemapMaterial.SetFloat("_AdaptionSpeed", adaptionSpeed);
 
-            rt.MarkRestoreExpected(); // keeping luminance values between frames, RT restore expected
-
 #if UNITY_EDITOR
             if (Application.isPlaying && !freshlyBrewedInternalRt)
                 Graphics.Blit(lumRt, rt, tonemapMaterial, 2);
             else
                 Graphics.Blit(lumRt, rt, tonemapMaterial, 3);
 #else
-			Graphics.Blit (lumRt, rt, tonemapMaterial, freshlyBrewedInternalRt ? 3 : 2);
+			Graphics.Blit (lumRt, rt, tonemapMaterial, freshlyBrewedInternalRt ? 3 : 2); 	
 #endif
 
             middleGrey = middleGrey < 0.001f ? 0.001f : middleGrey;

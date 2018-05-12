@@ -1,6 +1,8 @@
 fileFormatVersion: 2
-guid: 1fd999d1b2cf94a45a5b0a47ce074bef
+guid: 7f60662d4be61bb4fa9ef059a82fc945
+timeCreated: 18446744011573954816
 MonoImporter:
+  externalObjects: {}
   serializedVersion: 2
   defaultReferences:
   - colorCorrectionCurvesShader: {fileID: 4800000, guid: 62bcade1028c24ca1a39760ed84b9487,
@@ -13,3 +15,4 @@ MonoImporter:
   icon: {instanceID: 0}
   userData: 
   assetBundleName: 
+  assetBundleVariant: 
