@@ -4,7 +4,7 @@ using System.Collections;
 public class EnemySpawner : MonoBehaviour {
 
 	public GameObject enemy; //敵のオブジェクト
-	public float interval = 3; //何秒に一回敵を発生させるか
+	public float interval = 1; //何秒に一回敵を発生させるか
 	float timer = 0; //タイマー
 
 	void Update () {

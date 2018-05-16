@@ -4,4 +4,19 @@
 EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
-  m_Scenes: []
+  m_Scenes:
+  - enabled: 0
+    path: 
+    guid: 00000000000000000000000000000000
+  - enabled: 1
+    path: Assets/FPS s.unity
+    guid: f4fe865256efb8e46be171317fb35749
+  - enabled: 1
+    path: Assets/FPSPackage/Scenes/GameOver.unity
+    guid: 642432bfacf124942844840c8a8d66f1
+  - enabled: 0
+    path: 
+    guid: 00000000000000000000000000000000
+  - enabled: 0
+    path: 
+    guid: 00000000000000000000000000000000

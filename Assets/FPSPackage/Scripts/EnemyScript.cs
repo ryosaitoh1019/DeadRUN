@@ -19,7 +19,7 @@ public class EnemyScript : MonoBehaviour
                 Instantiate(Bomb, transform.position, transform.rotation);
             }
             // 敵を倒した数を1増やす
-            ScoreManager.instance.enemyCount++;
+            ScoreManager.instance.enemyCount+=100;
             Destroy(this.gameObject); //自分をしょうめつさせる
 
         }

@@ -18,6 +18,6 @@ public class RetryManager : MonoBehaviour {
 			ScoreManager.instance.enemyCount = 0;
 		}
 		// メインシーンに移動する
-		SceneManager.LoadScene("Main");
+		SceneManager.LoadScene("FPS s");
 	}
 }

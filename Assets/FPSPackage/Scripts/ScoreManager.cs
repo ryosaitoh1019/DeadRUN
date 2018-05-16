@@ -5,7 +5,7 @@ using UnityEngine.UI;
 public class ScoreManager : MonoBehaviour {
 
 	public static ScoreManager instance;
-	public int enemyCount =1; //敵を倒した数
+	public int enemyCount =100; //敵を倒した数
 	public Text scoreLabel; //UIテキスト
 
 
@@ -30,7 +30,7 @@ public class ScoreManager : MonoBehaviour {
 	void Update () {
 		if (scoreLabel) {
 			// 倒した数をTextに表示する。
-			scoreLabel.text = "倒した数:" + enemyCount.ToString ();
+			scoreLabel.text = "score:" + enemyCount.ToString ();
 		} else {
 			if (GameObject.Find ("EnemyCount")) {
 				scoreLabel = GameObject.Find ("EnemyCount").GetComponent<Text>();

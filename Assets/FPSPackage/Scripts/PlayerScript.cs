@@ -25,6 +25,11 @@ public class PlayerScript : MonoBehaviour
             SceneManager.LoadScene("GameOver");
         }
 
-    }
+	}
+	void cure()
+	{
+		playerHP+=5;
+
+	}
 }
 
